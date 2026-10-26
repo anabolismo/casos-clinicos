@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Misión Oftalmo — Nivel Básico</title>
+<style>
+:root{--navy:#071a2f;--blue:#0b3155;--cyan:#27d3d1;--white:#f8fbff;--red:#ff4057;--green:#43df9b;--muted:#a9bed0}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at top,#0d4166 0,#071a2f 48%,#03101d 100%);color:var(--white);min-height:100vh}
+.app{max-width:1100px;margin:auto;padding:28px 20px 50px}.panel{background:rgba(5,24,43,.92);border:1px solid rgba(39,211,209,.25);border-radius:28px;padding:32px;box-shadow:0 20px 70px rgba(0,0,0,.35)}
+h1{font-size:clamp(2.2rem,6vw,4.8rem);margin:.1em 0;line-height:.95}.accent{color:var(--cyan)}.sub{font-size:1.25rem;color:#c9d8e5}.center{text-align:center}
+input{width:min(520px,100%);padding:17px 20px;border-radius:15px;border:2px solid #2a5875;background:#061625;color:white;font-size:1.2rem}
+button{border:0;border-radius:16px;padding:15px 22px;font-size:1.05rem;font-weight:800;cursor:pointer;background:var(--cyan);color:#03222c;transition:.15s}button:hover{transform:translateY(-2px)}button:disabled{opacity:.5;cursor:not-allowed}
+.top{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center;margin-bottom:18px}.pill{background:#092843;border:1px solid #1e5471;border-radius:999px;padding:10px 15px;font-weight:800}.timer.danger{background:#551526;color:#ffdce1;border-color:#ff4057}
+.progress{height:12px;background:#102d44;border-radius:20px;overflow:hidden;margin:10px 0 26px}.bar{height:100%;width:0;background:linear-gradient(90deg,#27d3d1,#78f0bf);transition:.3s}
+.question{font-size:clamp(1.65rem,3.1vw,2.45rem);line-height:1.18;font-weight:900;margin:15px 0 24px}.answers{display:grid;grid-template-columns:1fr 1fr;gap:15px}.answer{background:#0b2a45;color:white;border:2px solid #1d4c68;text-align:left;font-size:clamp(1.15rem,2vw,1.45rem);padding:20px}.answer:hover{border-color:var(--cyan);background:#0d3658}.answer.correct{background:#0c503b;border-color:var(--green)}.answer.wrong{background:#571827;border-color:var(--red)}
+.feedback{display:none;margin-top:25px;padding:25px;border-radius:22px;background:#081d31;border:2px solid #26516e}.feedback.show{display:block;animation:pop .28s ease-out}.feedback h2{font-size:clamp(2rem,4vw,3.1rem);margin:0 0 12px}.feedback p{font-size:clamp(1.35rem,2.4vw,1.8rem);line-height:1.45;margin:.4em 0}.cat{font-size:6rem;animation:bounce .7s infinite alternate}.bigx{font-size:7rem;color:var(--red);font-weight:1000;line-height:1}.next{margin-top:18px;font-size:1.25rem;padding:17px 28px}
+.hidden{display:none!important}.result{font-size:1.4rem}.scoreBig{font-size:5rem;font-weight:1000;color:var(--cyan)}.hearts{letter-spacing:4px}
+@keyframes pop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}@keyframes bounce{to{transform:translateY(-12px) rotate(5deg)}}
+.confetti{position:fixed;top:-20px;width:10px;height:18px;background:hsl(var(--h),90%,60%);animation:fall var(--d) linear forwards;z-index:99}@keyframes fall{to{transform:translate(var(--x),110vh) rotate(720deg)}}
+@media(max-width:700px){.answers{grid-template-columns:1fr}.panel{padding:22px}.top{grid-template-columns:1fr 1fr}.top .progressWrap{grid-column:1/-1}}
+.small{color:var(--muted);font-size:.95rem}.badge{display:inline-block;padding:7px 12px;border-radius:999px;background:#103a5c;color:#7ff1e8;font-weight:900;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="app">
+<section id="start" class="panel center">
+<div class="badge">👁️ UAPO · DESAFÍO FORMATIVO</div>
+<h1>MISIÓN <span class="accent">OFTALMO</span></h1>
+<h2>NIVEL BÁSICO</h2>
+<p class="sub">GES · Glaucoma · Signos y síntomas · Tratamientos</p>
+<p>⏱️ 45 segundos por pregunta &nbsp; · &nbsp; ❤️ 3 vidas &nbsp; · &nbsp; ⭐ 100 puntos por acierto</p>
+<input id="name" placeholder="Nombre del estudiante" autocomplete="off"><br><br>
+<button onclick="startGame()">🚀 COMENZAR MISIÓN</button>
+<p class="small">20 preguntas. El tiempo agotado cuenta como respuesta incorrecta.</p>
+</section>
+
+<section id="game" class="panel hidden">
+<div class="top">
+<div class="progressWrap"><strong id="counter">Pregunta 1 de 20</strong><div class="progress"><div id="bar" class="bar"></div></div></div>
+<div id="timer" class="pill timer">⏱️ 45 s</div>
+<div class="pill"><span id="score">⭐ 0</span> &nbsp; <span id="lives" class="hearts">❤️❤️❤️</span></div>
+</div>
+<div id="topic" class="badge"></div>
+<div id="question" class="question"></div>
+<div id="answers" class="answers"></div>
+<div id="feedback" class="feedback center">
+<div id="effect"></div>
+<h2 id="feedbackTitle"></h2>
+<p id="correctAnswer"></p>
+<p id="explanation"></p>
+<button class="next" onclick="nextQuestion()">SIGUIENTE PREGUNTA ➜</button>
+</div>
+</section>
+
+<section id="end" class="panel center hidden">
+<div class="badge">🏁 MISIÓN COMPLETADA</div>
+<h1>RESULTADO FINAL</h1>
+<p id="studentEnd" class="sub"></p>
+<div id="finalScore" class="scoreBig"></div>
+<p id="finalMessage" class="result"></p>
+<p id="finalStats" class="result"></p>
+<button onclick="restart()">🔄 JUGAR DE NUEVO</button>
+</section>
+</div>
+<script>
+// EDITA AQUÍ LAS PREGUNTAS: q = pregunta, a = alternativas, c = índice correcto (0=A,1=B,2=C,3=D), e = explicación.
+const questions=[
+{t:"GES OFTALMOLÓGICO",q:"¿Cuál de las siguientes patologías corresponde a un problema de salud GES?",a:["Conjuntivitis alérgica","Retinopatía diabética","Ojo seco","Blefaritis"],c:1,e:"La retinopatía diabética está incorporada en las Garantías Explícitas en Salud (GES) y requiere pesquisa, confirmación diagnóstica y manejo según corresponda."},
+{t:"GES OFTALMOLÓGICO",q:"¿Cuál de estas condiciones oftalmológicas está cubierta por GES específicamente en personas de 65 años y más?",a:["Queratocono","Vicios de refracción","Conjuntivitis","Ojo seco"],c:1,e:"GES contempla los vicios de refracción en personas de 65 años y más, facilitando el acceso a evaluación y corrección óptica según los criterios establecidos."},
+{t:"GES OFTALMOLÓGICO",q:"¿Cuál de estas patologías pediátricas forma parte del GES?",a:["Estrabismo en menores de 9 años","Miopía en menores de 15 años","Conjuntivitis neonatal","Ambliopía en menores de 18 años"],c:0,e:"El estrabismo en menores de 9 años forma parte de los problemas de salud GES. Su detección y tratamiento oportunos son importantes para el desarrollo visual."},
+{t:"GES OFTALMOLÓGICO",q:"¿Qué tipo de desprendimiento de retina está incluido específicamente como problema GES?",a:["Cualquier desprendimiento traumático","Desprendimiento exudativo","Desprendimiento regmatógeno no traumático","Desprendimiento traccional diabético"],c:2,e:"El problema GES corresponde específicamente al desprendimiento de retina regmatógeno no traumático."},
+{t:"GLAUCOMA BÁSICO",q:"¿Qué estructura se daña principalmente en el glaucoma?",a:["Cristalino","Nervio óptico","Córnea","Iris"],c:1,e:"El glaucoma es una neuropatía óptica progresiva que produce daño característico del nervio óptico y puede generar pérdida del campo visual."},
+{t:"GLAUCOMA BÁSICO",q:"¿Cuál es el principal factor de riesgo modificable asociado a la progresión del glaucoma?",a:["Color del iris","Presión intraocular elevada","Presbicia","Astigmatismo"],c:1,e:"La presión intraocular es el principal factor de riesgo modificable. Reducirla es el objetivo central del tratamiento del glaucoma."},
+{t:"GLAUCOMA BÁSICO",q:"¿Cómo suele comportarse el glaucoma primario de ángulo abierto en sus etapas iniciales?",a:["Produce dolor ocular intenso","Produce pérdida visual súbita","Puede ser asintomático","Siempre produce ojo rojo"],c:2,e:"El glaucoma primario de ángulo abierto suele ser silencioso al comienzo. El paciente puede no notar síntomas hasta que existe daño significativo del campo visual."},
+{t:"GLAUCOMA BÁSICO",q:"¿Qué alteración funcional característica puede aparecer con la progresión del glaucoma?",a:["Pérdida progresiva del campo visual","Diplopía monocular","Metamorfopsias","Fotopsias"],c:0,e:"El daño glaucomatoso puede producir defectos progresivos del campo visual. Sin tratamiento, la pérdida puede avanzar y ser irreversible."},
+{t:"GLAUCOMA AGUDO",q:"Paciente con dolor ocular intenso, ojo rojo, visión borrosa, halos, cefalea y náuseas. ¿Qué debes sospechar?",a:["Catarata","Glaucoma agudo por cierre angular","Retinopatía diabética","Presbicia"],c:1,e:"Dolor ocular intenso, ojo rojo, visión borrosa o halos, cefalea y síntomas vegetativos son compatibles con un ataque agudo por cierre angular y requieren atención urgente."},
+{t:"GLAUCOMA AGUDO",q:"En un ataque agudo de glaucoma por cierre angular, ¿qué valor de presión intraocular podríamos encontrar?",a:["Entre 15–25 mmHg","Entre 11–21 mmHg","Entre 25–32 mmHg",">45 mmHg"],c:3,e:"En un ataque agudo por cierre angular la PIO puede elevarse de forma muy marcada, incluso por sobre 45 mmHg. Debe interpretarse junto con el cuadro clínico y los hallazgos oculares."},
+{t:"GLAUCOMA AGUDO",q:"¿Cuál de estos hallazgos pupilares puede observarse en un glaucoma agudo por cierre angular?",a:["Pupila puntiforme","Pupila media dilatada y poco reactiva","Pupilas siempre normales","Miosis bilateral reactiva"],c:1,e:"En el cierre angular agudo puede observarse una pupila en semimidriasis o media dilatación, con respuesta disminuida a la luz."},
+{t:"GLAUCOMA AGUDO",q:"¿El glaucoma agudo por cierre angular constituye una urgencia oftalmológica?",a:["No","Sí","Solo si existe catarata","Solo en pacientes diabéticos"],c:1,e:"Sí. La elevación marcada de la PIO puede producir daño irreversible del nervio óptico, por lo que requiere evaluación y tratamiento urgente."},
+{t:"TRATAMIENTO",q:"¿Cuál es el objetivo principal de los medicamentos antiglaucomatosos?",a:["Mejorar la acomodación","Disminuir la presión intraocular","Dilatar permanentemente la pupila","Mejorar la transparencia del cristalino"],c:1,e:"El tratamiento busca disminuir la presión intraocular para reducir el riesgo de aparición o progresión del daño glaucomatoso."},
+{t:"TRATAMIENTO",q:"¿A qué familia farmacológica pertenece latanoprost?",a:["Betabloqueadores","Análogos de prostaglandinas","Antibióticos","Corticoides"],c:1,e:"Latanoprost es un análogo de prostaglandinas. Su efecto hipotensor se relaciona principalmente con el aumento del drenaje del humor acuoso."},
+{t:"TRATAMIENTO",q:"¿A qué familia farmacológica pertenece timolol?",a:["Betabloqueadores","Prostaglandinas","Antibióticos","Midriáticos"],c:0,e:"Timolol es un betabloqueador utilizado para disminuir la presión intraocular al reducir la producción de humor acuoso."},
+{t:"TRATAMIENTO",q:"¿Cuál de estos medicamentos disminuye la producción de humor acuoso mediante bloqueo beta-adrenérgico?",a:["Latanoprost","Timolol","Tropicamida","Atropina"],c:1,e:"Timolol bloquea receptores beta-adrenérgicos en el cuerpo ciliar y reduce la producción de humor acuoso."},
+{t:"TRATAMIENTO",q:"¿Qué efecto ocular puede asociarse al uso de análogos de prostaglandinas?",a:["Cambio de pigmentación del iris y crecimiento de pestañas","Catarata inmediata","Desprendimiento de retina","Parálisis permanente de la acomodación"],c:0,e:"Los análogos de prostaglandinas pueden aumentar la pigmentación del iris y producir cambios en las pestañas, como mayor longitud, grosor o número."},
+{t:"TRATAMIENTO",q:"¿En qué paciente debe tenerse especial precaución con timolol tópico?",a:["Paciente con astigmatismo","Paciente con asma","Paciente con presbicia","Paciente con miopía"],c:1,e:"Los betabloqueadores tópicos pueden producir efectos sistémicos. Timolol requiere especial precaución en pacientes con asma o enfermedad broncoespástica."},
+{t:"INTEGRACIÓN CLÍNICA",q:"Paciente de 70 años presenta disminución visual progresiva e indolora y opacidad del cristalino. ¿Cuál es el diagnóstico más probable?",a:["Glaucoma agudo","Catarata","Desprendimiento de retina","Queratitis"],c:1,e:"La catarata corresponde a una opacificación del cristalino y suele provocar disminución visual progresiva e indolora."},
+{t:"INTEGRACIÓN CLÍNICA",q:"Paciente diabético presenta neovascularización retinal. ¿En qué etapa de retinopatía diabética pensarías?",a:["Sin retinopatía","RD no proliferativa leve","RD proliferativa","Catarata diabética"],c:2,e:"La presencia de neovascularización retinal o del disco óptico es característica de la retinopatía diabética proliferativa."}
+];
+let i=0,score=0,lives=3,time=45,tick=null,locked=false,student="",corrects=0;
+const $=id=>document.getElementById(id);
+function startGame(){student=$("name").value.trim()||"Estudiante";$("start").classList.add("hidden");$("game").classList.remove("hidden");loadQuestion()}
+function loadQuestion(){clearInterval(tick);locked=false;time=45;$("feedback").classList.remove("show");$("feedback").style.display="none";const q=questions[i];$("counter").textContent=`Pregunta ${i+1} de ${questions.length}`;$("bar").style.width=`${(i/questions.length)*100}%`;$("topic").textContent=q.t;$("question").textContent=q.q;$("answers").innerHTML="";q.a.forEach((x,n)=>{let b=document.createElement("button");b.className="answer";b.innerHTML=`<strong>${String.fromCharCode(65+n)})</strong> ${x}`;b.onclick=()=>answer(n,b);$("answers").appendChild(b)});updateHUD();tick=setInterval(()=>{time--;updateHUD();if(time<=0){clearInterval(tick);timeout()}},1000)}
+function updateHUD(){$("timer").textContent=`⏱️ ${time} s`;$("timer").classList.toggle("danger",time<=10);$("score").textContent=`⭐ ${score}`;$("lives").textContent="❤️".repeat(Math.max(lives,0))+"🖤".repeat(Math.max(0,3-lives))}
+function answer(n,btn){if(locked)return;locked=true;clearInterval(tick);const q=questions[i];[...$("answers").children].forEach((b,k)=>{b.disabled=true;if(k===q.c)b.classList.add("correct")});if(n===q.c){score+=100;corrects++;btn.classList.add("correct");showFeedback(true)}else{lives--;btn.classList.add("wrong");horn();showFeedback(false)}updateHUD()}
+function timeout(){if(locked)return;locked=true;lives--;[...$("answers").children].forEach((b,k)=>{b.disabled=true;if(k===questions[i].c)b.classList.add("correct")});horn();showFeedback(false,true);updateHUD()}
+function showFeedback(ok,timed=false){const q=questions[i];$("feedback").style.display="block";requestAnimationFrame(()=>$("feedback").classList.add("show"));$("effect").innerHTML=ok?'<div class="cat">🐱🎉</div>':'<div class="bigx">✕</div>';$("feedbackTitle").textContent=ok?"¡EXCELENTE DECISIÓN! +100 PUNTOS":timed?"¡TIEMPO AGOTADO!":"RESPUESTA INCORRECTA";$("correctAnswer").innerHTML=`<strong>Respuesta correcta:</strong> ${String.fromCharCode(65+q.c)}) ${q.a[q.c]}`;$("explanation").innerHTML=`<strong>📚 ¿Por qué?</strong><br>${q.e}`;if(ok){confetti();cheer()}}
+function nextQuestion(){i++;if(i>=questions.length||lives<=0)endGame();else loadQuestion()}
+function endGame(){clearInterval(tick);$("game").classList.add("hidden");$("end").classList.remove("hidden");$("bar").style.width="100%";$("studentEnd").textContent=`${student}, completaste la misión.`;$("finalScore").textContent=`${score} pts`;let pct=Math.round(corrects/questions.length*100);$("finalStats").textContent=`Aciertos: ${corrects}/${questions.length} · Rendimiento: ${pct}%`;$("finalMessage").textContent=pct>=85?"🏆 ¡Excelente dominio de los conceptos básicos!":pct>=60?"👁️ ¡Buen trabajo! A reforzar algunos conceptos.":"📚 Misión de entrenamiento: revisa la retroalimentación y vuelve a intentarlo."}
+function restart(){i=0;score=0;lives=3;corrects=0;$("end").classList.add("hidden");$("start").classList.remove("hidden")}
+function confetti(){for(let n=0;n<75;n++){let c=document.createElement("div");c.className="confetti";c.style.left=Math.random()*100+"vw";c.style.setProperty("--h",Math.random()*360);c.style.setProperty("--x",(Math.random()*240-120)+"px");c.style.setProperty("--d",(1.7+Math.random()*2)+"s");document.body.appendChild(c);setTimeout(()=>c.remove(),4000)}}
+function audioCtx(){return new (window.AudioContext||window.webkitAudioContext)()}
+function tone(freq,dur,type="sine",vol=.08,delay=0){try{let a=audioCtx(),o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.value=freq;g.gain.value=vol;o.connect(g);g.connect(a.destination);o.start(a.currentTime+delay);o.stop(a.currentTime+delay+dur)}catch(e){}}
+function cheer(){tone(523,.12,"sine",.06);setTimeout(()=>tone(659,.12,"sine",.06),120);setTimeout(()=>tone(784,.22,"sine",.07),240)}
+function horn(){try{let a=audioCtx(),o=a.createOscillator(),g=a.createGain();o.type="sawtooth";o.frequency.setValueAtTime(180,a.currentTime);o.frequency.linearRampToValueAtTime(95,a.currentTime+.55);g.gain.setValueAtTime(.10,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.6);o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+.62)}catch(e){}}
+</script>
+</body></html>
